@@ -147,3 +147,7 @@ ENV/
 
 # mypy
 .mypy_cache/
+.idea/misc.xml
+.idea/modules.xml
+.idea/remote_toxido.iml
+.idea/vcs.xml
