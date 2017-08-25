@@ -7,16 +7,22 @@
 
 """
 import argparse
-
+from communication import communication
 
 
 def main():
-    args = argument_parser()
+    ip, port = argument_parser()
+    conn = communication.RemoteCommunicator(ip, port)
+    conn.loop_get_commands()
 
 
 def argument_parser():
-    pass
+    parser = argparse.ArgumentParser()
+    parser.add_argument('ip', type=str, help="ip_address")
+    parser.add_argument('port', type=int, help="port")
 
+    ip, port = parser.parse_args()
+    return ip, int(port)
 
 
 if __name__ == "__main__":
