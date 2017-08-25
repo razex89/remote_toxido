@@ -49,7 +49,7 @@ class SSLSocket(object):
         return self.recv_data(buffer_length)
 
     @classmethod
-    def create_ssl_socket(cls, sock):
+    def _convert_ssl_sock_to_SSLSocket(cls, sock):
         """
         create a new instance of cls as _sock is socket.
         :param socket.socket sock: a socket. 
@@ -59,7 +59,6 @@ class SSLSocket(object):
         ssl_sock = cls(host, port)
         ssl_sock._sock = sock
         return ssl_sock
-
 
 
 class SSLClient(SSLSocket):
@@ -72,8 +71,7 @@ class SSLClient(SSLSocket):
         super(SSLClient, self).__init__(host, port)
         self._sock = create_ssl_socket(False)
 
-
-    def start_session(self):
+    def connect(self):
         try:
             self._sock.connect((self._host, self._port))
             log("Successfully connected to server!", Level.INFO)
@@ -92,6 +90,10 @@ class SSLClient(SSLSocket):
                 exc=ssl_error),
                 Level.CRITICAL)
 
+    def close(self):
+        self._sock.close()
+        log("SOCKET has been closed", Level.INFO)
+
 
 class SSLServer(SSLSocket):
     """ implementation of SSLServer """
@@ -99,29 +101,27 @@ class SSLServer(SSLSocket):
     DEFAULT_BACKLOG = 5
 
     def __init__(self, host, port, key_file=ssl_file_consts.PRIVATE_KEY, cert_file=ssl_file_consts.SERVER_CERTIFICATE):
+        super(SSLSocket, self).__init__()
         self._sock = create_ssl_socket(True,
                                        key_file=key_file,
                                        cert_file=cert_file)
         self._host = host
         self._port = port
         self.init()
-        super(SSLSocket, self).__init__()
 
     def init(self):
         """ initiation of starter command for the socket."""
-        self._sock.listen(self.DEFAULT_BACKLOG)
         self._sock.bind((self._host, self._port))
+        self._sock.listen(self.DEFAULT_BACKLOG)
 
     def accept(self):
         try:
             sock, (ip, port) = self._sock.accept()
             log("accepted {ip}:{port}".format(ip=ip, port=port), Level.INFO)
-            return SSLClient.create_ssl_socket(sock)
+            return SSLClient._convert_ssl_sock_to_SSLSocket(sock)
         except ssl.SSLError as e:
             log("Exception occurred while accepting clients - {e}".format(e=e), Level.FATAL)
 
-
-
-
-
-
+    def close(self):
+        self._sock.close()
+        log("SOCKET has been closed", Level.INFO)
