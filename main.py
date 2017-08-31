@@ -21,8 +21,8 @@ def argument_parser():
     parser.add_argument('ip', type=str, help="ip_address")
     parser.add_argument('port', type=int, help="port")
 
-    ip, port = parser.parse_args()
-    return ip, int(port)
+    args = parser.parse_args()
+    return args.ip, int(args.port)
 
 
 if __name__ == "__main__":
