@@ -13,6 +13,7 @@ from communication import communication
 def main():
     ip, port = argument_parser()
     conn = communication.RemoteCommunicator(ip, port)
+    conn.connect()
     conn.loop_get_commands()
 
 
