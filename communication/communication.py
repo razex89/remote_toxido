@@ -5,7 +5,7 @@ from core import shell
 
 
 class RemoteCommunicator(SSLClient):
-    _DEFAULT_TIMEOUT = 3
+    #    _DEFAULT_TIMEOUT = 3
     _IDENTIFIER = 0x1234567890
     _EOL = "\x03\x03EOLEOLEOL"
     _SELF_SHUTDOWN_OUT = "SELF_SHUTDOWN"
@@ -16,10 +16,8 @@ class RemoteCommunicator(SSLClient):
 
     def __init__(self, local_toxido_ip, local_toxido_port):
         super(RemoteCommunicator, self).__init__(local_toxido_ip, local_toxido_ip)
-        self._sock.settimeout(self._DEFAULT_TIMEOUT)
 
-    def func(self):
-        pass
+    #        self._sock.settimeout(self._DEFAULT_TIMEOUT)
 
     def _send_identifier(self):
         """ sends identifier to local_toxido for identifying himself as remote_toxido"""
@@ -51,7 +49,7 @@ class RemoteCommunicator(SSLClient):
 
             out = self.handle_command(data)
             if out == self._SELF_SHUTDOWN_OUT:
-                self.shutdown()
+                self._shutdown()
 
     def _open_cmd(self, args=None):
         """create shell, argument is ignored."""
@@ -66,6 +64,5 @@ class RemoteCommunicator(SSLClient):
     def _input_cmd_command(self, args):
         data = self._cmd_obj.run(args)
         return self._CMD_TEMPLATE_OUT.format(stdout=data)
-
 
     COMMAND_DICT = {"SHUTDOWN": _shutdown, "CMD_IN": _close_cmd, "CMD_OPEN": _open_cmd, "CMD_CLOSE": None}
