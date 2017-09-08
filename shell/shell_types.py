@@ -1,6 +1,6 @@
 from subprocess import Popen, PIPE
 from time import sleep
-from logger import logger
+from core_utils.logger import logger
 
 class CmdCommunicator(object):
     _EOL = "\r\n"
