@@ -1,6 +1,7 @@
+import os
 from subprocess import Popen, PIPE
 from time import sleep
-from core_utils.logger import logger
+from core_utils.logger import getLogger
 
 class CmdCommunicator(object):
     _EOL = "\r\n"
@@ -8,10 +9,13 @@ class CmdCommunicator(object):
     _EXPECTED_STRING = "CMD_PROMPT>"
 
     def __init__(self, cmd_location):
+        self._logger = getLogger(str(self.__class__))
         self._process = Popen(cmd_location, stdin=PIPE, stdout=PIPE, stderr=PIPE)
         sleep(2)
         self._process.stdin.write("prompt CMD_PROMPT$G" + self._SUFFIX_COMMAND)
         self.expect()
+        self._set_env_variables()
+
 
     def run(self, command, expected_string=_EXPECTED_STRING):
         self._process.stdin.write(command + self._SUFFIX_COMMAND)
@@ -27,12 +31,22 @@ class CmdCommunicator(object):
             data += next_data
         return data
 
+    def _set_env_variables(self):
+        self._logger.info('setting env variables')
+        system_environment_variables = ''
+        if os.name == 'nt':
+            import winreg
+            reg_path = r'SYSTEM\CurrentControlSet\Control\Session Manager\Environment'
+            reg_key = winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, reg_path)
+            system_environment_variables = winreg.QueryValueEx(reg_key, 'Path')[0]
+        self.run('SET PATH={0}'.format(system_environment_variables))
+
     def close(self):
         self._process.kill()
-        logger.log("successfully ended the process", logger.Level.INFO)
+        self._logger.info("successfully ended the process")
+
 
 class CmdOutput(object):
-
     def __init__(self, text):
         self._text = text
 
